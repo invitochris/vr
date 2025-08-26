@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>CyberMind VR - Ciberseguridad</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.7/aframe/build/aframe-ar.js"></script>
+  </head>
+  <body>
+    <a-scene embedded arjs="sourceType: webcam;">
+      
+      <!-- Nodos de Ciberseguridad -->
+      <a-box id="node1" position="-1 1 -3" depth="0.5" height="0.5" width="0.5" color="#4CC3D9"></a-box>
+      <a-sphere id="node2" position="1 1 -3" radius="0.5" color="#EF2D5E"></a-sphere>
+      <a-cylinder id="node3" position="0 1 -2" radius="0.3" height="0.8" color="#FFC65D"></a-cylinder>
+
+      <!-- Cámara con cursor (mirada) -->
+      <a-entity camera look-controls position="0 1.6 0">
+        <a-cursor
+          id="cursor"
+          fuse="true"
+          fuse-timeout="1000"
+          material="color: yellow; shader: flat"
+          geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02">
+        </a-cursor>
+      </a-entity>
+
+      <!-- Luz -->
+      <a-light type="ambient" color="#FFFFFF"></a-light>
+    </a-scene>
+
+    <script>
+      // 🚀 Tu API de Colab vía ngrok (ya reemplazada con tu URL)
+      const API_URL = "https://d6f2ffcfc31f.ngrok-free.app/generar";
+
+      async function enviarPrompt(prompt, nodo) {
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: prompt })
+          });
+          const data = await response.json();
+
+          alert("📜 Código generado:\n" + data.codigo + "\n\n🔒 Sandbox: " + data.sandbox);
+
+          // Cambiar color del nodo según riesgo
+          if(data.sandbox.includes("⚠")) {
+            nodo.setAttribute("color", "red");
+          } else {
+            nodo.setAttribute("color", "green");
+          }
+        } catch (error) {
+          console.error("Error al contactar la API:", error);
+          alert("❌ Error al conectar con la IA");
+        }
+      }
+
+      // Asociar cada nodo a un prompt de ciberseguridad
+      function setupGazeInteraction(nodoId, prompt) {
+        const nodo = document.querySelector(`#${nodoId}`);
+        nodo.addEventListener("mouseenter", () => {
+          enviarPrompt(prompt, nodo);
+        });
+      }
+
+      setupGazeInteraction("node1", "Genera un script de prueba para XSS");
+      setupGazeInteraction("node2", "Genera un script de prueba para SQL Injection");
+      setupGazeInteraction("node3", "Genera un script para escaneo de puertos en Python");
+    </script>
+  </body>
+</html>
